@@ -1,0 +1,100 @@
+- name: Set up Docker Swarm Cluster with Dynamic IPs
+  hosts: all
+  become: true
+  vars:
+    MANAGER1_IP: "{{ hostvars[groups['managers'][0]].ansible_host }}"
+    MANAGER2_IP: "{{ hostvars[groups['managers'][1]].ansible_host }}"
+    WORKER1_IP: "{{ hostvars[groups['workers'][0]].ansible_host }}"
+    WORKER2_IP: "{{ hostvars[groups['workers'][1]].ansible_host }}"
+    WORKER3_IP: "{{ hostvars[groups['workers'][2]].ansible_host }}"
+  pre_tasks:
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+    - name: Add Docker repository
+      command: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+- name: Initialize Docker Swarm Cluster
+  hosts: managers[0] # Only the first manager
+  become: true
+  tasks:
+    - name: Initialize Docker Swarm on the first manager
+      command: docker swarm init --advertise-addr {{ MANAGER1_IP }}
+      register: swarm_init_output
+      ignore_errors: true
+
+    - name: Get manager join token
+      command: docker swarm join-token manager -q
+      register: manager_join_token
+      when: swarm_init_output.rc == 0
+
+    - name: Get worker join token
+      command: docker swarm join-token worker -q
+      register: worker_join_token
+      when: swarm_init_output.rc == 0
+
+    - name: Debug manager token
+      debug:
+        msg: 'Manager join token: {{ manager_join_token.stdout }}'
+
+    - name: Debug worker token
+      debug:
+        msg: 'Worker join token: {{ worker_join_token.stdout }}'
+
+    - name: Save manager token
+      copy:
+        content: '{{ manager_join_token.stdout }}'
+        dest: /tmp/manager_join_token
+
+    - name: Save worker token
+      copy:
+        content: '{{ worker_join_token.stdout }}'
+        dest: /tmp/worker_join_token
+
+- name: Join additional managers to the Swarm
+  hosts: managers[1:] # All managers except the first one
+  become: true
+  tasks:
+    - name: Retrieve manager token from the first manager
+      fetch:
+        src: /tmp/manager_join_token
+        dest: /tmp/manager_join_token
+        flat: yes
+
+    - name: Join the Swarm as a manager
+      command: docker swarm join --token {{ lookup('file', '/tmp/manager_join_token') }} {{ MANAGER1_IP }}:2377
+
+- name: Join worker nodes to the Swarm
+  hosts: workers
+  become: true
+  tasks:
+    - name: Retrieve worker token from the first manager
+      fetch:
+        src: /tmp/worker_join_token
+        dest: /tmp/worker_join_token
+        flat: yes
+
+    - name: Join the Swarm as a worker
+      command: docker swarm join --token {{ lookup('file', '/tmp/worker_join_token') }} {{ MANAGER1_IP }}:2377
