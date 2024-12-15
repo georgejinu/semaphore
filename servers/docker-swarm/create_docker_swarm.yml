@@ -24,11 +24,23 @@
     - name: Add Docker repository
       command: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
+    - name: Update package cache
+      apt:
+        update_cache: yes
+
     - name: Install Docker
       apt:
         name: docker-ce
         state: present
         update_cache: yes
+      ignore_errors: true
+
+    - name: Fallback to install Docker IO if Docker CE is unavailable
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+      when: ansible_failed_when_result is defined and ansible_failed_when_result
 
     - name: Start and enable Docker
       systemd:
