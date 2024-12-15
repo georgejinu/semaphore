@@ -1,6 +1,7 @@
 - name: Set up Docker Swarm Cluster with Dynamic IPs
   hosts: all
   become: true
+  become_user: root
   vars:
     MANAGER1_IP: "{{ hostvars[groups['managers'][0]].ansible_host }}"
     MANAGER2_IP: "{{ hostvars[groups['managers'][1]].ansible_host }}"
@@ -51,6 +52,7 @@
 - name: Initialize Docker Swarm Cluster
   hosts: managers[0] # Only the first manager
   become: true
+  become_user: root
   tasks:
     - name: Initialize Docker Swarm on the first manager
       command: docker swarm init --advertise-addr {{ MANAGER1_IP }}
@@ -88,6 +90,7 @@
 - name: Join additional managers to the Swarm
   hosts: managers[1:] # All managers except the first one
   become: true
+  become_user: root
   tasks:
     - name: Retrieve manager token from the first manager
       fetch:
@@ -101,6 +104,7 @@
 - name: Join worker nodes to the Swarm
   hosts: workers
   become: true
+  become_user: root
   tasks:
     - name: Retrieve worker token from the first manager
       fetch:
