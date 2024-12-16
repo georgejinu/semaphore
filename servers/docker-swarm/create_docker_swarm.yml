@@ -1,3 +1,7 @@
+- name: Debug hostvars
+  debug:
+    var: hostvars
+
 - name: Set up Docker Swarm Cluster with Dynamic IPs
   hosts: all
   become: true
@@ -8,6 +12,15 @@
     WORKER1_IP: "{{ hostvars[groups['workers'][0]].ansible_host }}"
     WORKER2_IP: "{{ hostvars[groups['workers'][1]].ansible_host }}"
     WORKER3_IP: "{{ hostvars[groups['workers'][2]].ansible_host }}"
+  tasks:
+    - name: Debug Manager and Worker IPs
+      debug:
+        msg:
+          - 'MANAGER1_IP: {{ MANAGER1_IP }}'
+          - 'MANAGER2_IP: {{ MANAGER2_IP }}'
+          - 'WORKER1_IP: {{ WORKER1_IP }}'
+          - 'WORKER2_IP: {{ WORKER2_IP }}'
+          - 'WORKER3_IP: {{ WORKER3_IP }}'
   pre_tasks:
     - name: Install Docker dependencies
       apt:
@@ -53,17 +66,6 @@
         name: docker
         state: started
         enabled: true
-
-- name: Debug manager IPs
-  hosts: localhost
-  tasks:
-    - debug:
-        msg:
-          - 'MANAGER1_IP: {{ hostvars[groups['managers'][0]].ansible_host }}'
-          - 'MANAGER2_IP: {{ hostvars[groups['managers'][1]].ansible_host }}'
-          - 'WORKER1_IP: {{ WORKER1_IP }}'
-          - 'WORKER2_IP: {{ WORKER2_IP }}'
-          - 'WORKER3_IP: {{ WORKER3_IP }}'
 
 - name: Initialize Docker Swarm Cluster
   hosts: managers[0] # Only the first manager
