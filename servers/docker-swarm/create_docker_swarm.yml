@@ -55,8 +55,15 @@
         enabled: true
 
 - name: Debug manager IPs
-  debug:
-    msg: 'Manager 1 IP: {{ MANAGER1_IP }}, Manager 2 IP: {{ MANAGER2_IP }}, Worker 1 IP: {{ WORKER1_IP }}, Worker 2 IP: {{ WORKER2_IP }}, Worker 3 IP: {{ WORKER3_IP }}'
+  hosts: localhost
+  tasks:
+    - debug:
+        msg:
+          - 'MANAGER1_IP: {{ MANAGER1_IP }}'
+          - 'MANAGER2_IP: {{ MANAGER2_IP }}'
+          - 'WORKER1_IP: {{ WORKER1_IP }}'
+          - 'WORKER2_IP: {{ WORKER2_IP }}'
+          - 'WORKER3_IP: {{ WORKER3_IP }}'
 
 - name: Initialize Docker Swarm Cluster
   hosts: managers[0] # Only the first manager
