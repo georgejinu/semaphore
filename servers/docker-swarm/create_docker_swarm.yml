@@ -1,6 +1,10 @@
-- name: Debug hostvars
-  debug:
-    var: hostvars
+- name: Debug example
+  hosts: all
+  become: true
+  tasks:
+    - name: Print debug information about hostvars
+      debug:
+        var: hostvars
 
 - name: Set up Docker Swarm Cluster with Dynamic IPs
   hosts: all
