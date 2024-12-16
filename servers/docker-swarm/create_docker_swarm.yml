@@ -19,16 +19,16 @@
         state: present
         update_cache: yes
 
-    - name: Download Docker GPG key
-      get_url:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        dest: /etc/apt/trusted.gpg.d/docker.asc
+    # - name: Download Docker GPG key
+    #   get_url:
+    #     url: https://download.docker.com/linux/ubuntu/gpg
+    #     dest: /etc/apt/trusted.gpg.d/docker.asc
 
-    - name: Add Docker GPG key
-      command: apt-key add /etc/apt/trusted.gpg.d/docker.asc
+    # - name: Add Docker GPG key
+    #   command: apt-key add /etc/apt/trusted.gpg.d/docker.asc
 
-    - name: Add Docker repository
-      command: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    # - name: Add Docker repository
+    #   command: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
     - name: Update package cache
       apt:
