@@ -96,12 +96,16 @@
         dest: /tmp/worker_join_token
 
     - name: Debug local manager join token file
+      become: true
+      become_user: root
       local_action:
         module: stat
         path: /tmp/manager_join_token
       register: local_manager_token
 
     - name: Show token file existence
+      become: true
+      become_user: root
       debug:
         var: local_manager_token.stat.exists
 
@@ -111,6 +115,8 @@
   become_user: root
   tasks:
     - name: Check if manager join token file exists
+      become: true
+      become_user: root
       stat:
         path: /tmp/manager_join_token
       register: manager_token_file
@@ -121,6 +127,8 @@
       when: not manager_token_file.stat.exists
 
     - name: Join the Swarm as a manager
+      become: true
+      become_user: root
       command: >
         docker swarm join --token {{ lookup('file', '/tmp/manager_join_token') }} {{ manager1_ip }}:2377
       when: manager_token_file.stat.exists
@@ -137,4 +145,6 @@
         flat: yes
 
     - name: Join the Swarm as a worker
+      become: true
+      become_user: root
       command: docker swarm join --token {{ lookup('file', '/tmp/worker_join_token') }} {{ manager1_ip }}:2377
