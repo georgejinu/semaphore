@@ -1,13 +1,13 @@
 - name: Deploy Web Application
-  hosts: webservers
+  hosts: managers
   tasks:
     - name: Print environment variable
       debug:
         msg: 'The application is running in {{ app_env }} environment'
 
 - name: Configure Database
-  hosts: dbservers
+  hosts: workers
   tasks:
     - name: Print DB credentials
       debug:
-        msg: 'Connecting as {{ db_user }} with password {{ db_pass }}'
+        msg: 'The application is running in {{ app_env }} environment'
