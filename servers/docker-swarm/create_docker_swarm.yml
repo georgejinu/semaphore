@@ -95,6 +95,16 @@
         content: '{{ worker_join_token.stdout }}'
         dest: /tmp/worker_join_token
 
+    - name: Debug local manager join token file
+      local_action:
+        module: stat
+        path: /tmp/manager_join_token
+      register: local_manager_token
+
+    - name: Show token file existence
+      debug:
+        var: local_manager_token.stat.exists
+
 - name: Join additional managers to the Swarm
   hosts: managers[1:] # All managers except the first one
   become: true
