@@ -10,4 +10,4 @@
   tasks:
     - name: Print DB credentials
       debug:
-        msg: 'The application is running in {{ app_env }} environment'
+        msg: 'Connecting as {{ db_user }} with password {{ db_pass }}'
