@@ -100,14 +100,20 @@
   become: true
   become_user: root
   tasks:
-    - name: Retrieve manager token from the first manager
-      fetch:
-        src: /tmp/manager_join_token
-        dest: /tmp/manager_join_token
-        flat: yes
+    - name: Check if manager join token file exists
+      stat:
+        path: /tmp/manager_join_token
+      register: manager_token_file
+
+    - name: Fail if manager join token file is missing
+      fail:
+        msg: 'Manager join token file is missing! Ensure it is fetched from manager1.'
+      when: not manager_token_file.stat.exists
 
     - name: Join the Swarm as a manager
-      command: docker swarm join --token {{ lookup('file', '/tmp/manager_join_token') }} {{ manager1_ip }}:2377
+      command: >
+        docker swarm join --token {{ lookup('file', '/tmp/manager_join_token') }} {{ manager1_ip }}:2377
+      when: manager_token_file.stat.exists
 
 - name: Join worker nodes to the Swarm
   hosts: workers
