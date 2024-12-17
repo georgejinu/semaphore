@@ -22,17 +22,6 @@
         state: present
         update_cache: yes
 
-    # - name: Download Docker GPG key
-    #   get_url:
-    #     url: https://download.docker.com/linux/ubuntu/gpg
-    #     dest: /etc/apt/trusted.gpg.d/docker.asc
-
-    # - name: Add Docker GPG key
-    #   command: apt-key add /etc/apt/trusted.gpg.d/docker.asc
-
-    # - name: Add Docker repository
-    #   command: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
     - name: Update package cache
       apt:
         update_cache: yes
@@ -58,7 +47,7 @@
         enabled: true
 
 - name: Initialize Docker Swarm Cluster
-  hosts: managers[0] # Only the first manager
+  hosts: managers[0]
   become: true
   become_user: root
   tasks:
@@ -95,37 +84,55 @@
         content: '{{ worker_join_token.stdout }}'
         dest: /tmp/worker_join_token
 
+    - name: Mark swarm initialization complete
+      file:
+        path: /tmp/swarm_initialized
+        state: touch
+      when: swarm_init_output.rc == 0
+
 - name: Join additional managers to the Swarm
-  hosts: managers[1:] # All managers except the first one
+  hosts: managers[1:]
   become: true
   become_user: root
   tasks:
+    - name: Wait for swarm initialization to complete
+      wait_for:
+        path: /tmp/swarm_initialized
+        timeout: 300
+      delegate_to: '{{ manager1_ip }}'
+
     - name: Read the manager join token from the first manager
-      become: true
-      become_user: root
       shell: cat /tmp/manager_join_token
       register: manager_join_token
-      delegate_to: '{{ manager1_ip }}' # Execute this task on the first manager
+      delegate_to: '{{ manager1_ip }}'
 
     - name: Join the Swarm as a manager
-      become: true
-      become_user: root
-      command: >
-        docker swarm join --token {{ manager_join_token.stdout }} {{ manager1_ip }}:2377
+      command: docker swarm join --token {{ manager_join_token.stdout }} {{ manager1_ip }}:2377
+
+    - name: Mark managers joined
+      file:
+        path: /tmp/managers_joined
+        state: touch
+      delegate_to: '{{ manager1_ip }}'
 
 - name: Join worker nodes to the Swarm
   hosts: workers
   become: true
   become_user: root
   tasks:
-    - name: Read the manager join token from the first manager
-      become: true
-      become_user: root
+    - name: Wait for swarm initialization and managers to join
+      wait_for:
+        path: '{{ item }}'
+        timeout: 300
+      delegate_to: '{{ manager1_ip }}'
+      with_items:
+        - /tmp/swarm_initialized
+        - /tmp/managers_joined
+
+    - name: Read the worker join token from the first manager
       shell: cat /tmp/worker_join_token
       register: worker_join_token
-      delegate_to: '{{ manager1_ip }}' # Execute this task on the first manager
+      delegate_to: '{{ manager1_ip }}'
 
     - name: Join the Swarm as a worker
-      become: true
-      become_user: root
       command: docker swarm join --token {{ worker_join_token.stdout }} {{ manager1_ip }}:2377
