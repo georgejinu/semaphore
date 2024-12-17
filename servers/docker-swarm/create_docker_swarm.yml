@@ -2,21 +2,15 @@
   hosts: all
   become: true
   become_user: root
-  vars:
-    MANAGER1_IP: '{{ manager1_ip }}'
-    MANAGER2_IP: '{{ manager2_ip }}'
-    WORKER1_IP: '{{ worker1_ip }}'
-    WORKER2_IP: '{{ worker2_ip }}'
-    WORKER3_IP: '{{ worker3_ip }}'
   tasks:
     - name: Debug Manager and Worker IPs
       debug:
         msg:
-          - 'MANAGER1_IP: {{ MANAGER1_IP }}'
-          - 'MANAGER2_IP: {{ MANAGER2_IP }}'
-          - 'WORKER1_IP: {{ WORKER1_IP }}'
-          - 'WORKER2_IP: {{ WORKER2_IP }}'
-          - 'WORKER3_IP: {{ WORKER3_IP }}'
+          - 'manager1_ip: {{ manager1_ip }}'
+          - 'manager2_ip: {{ manager2_ip }}'
+          - 'worker1_ip: {{ worker1_ip }}'
+          - 'worker2_ip: {{ worker2_ip }}'
+          - 'worker3_ip: {{ worker3_ip }}'
   pre_tasks:
     - name: Install Docker dependencies
       apt:
@@ -69,7 +63,7 @@
   become_user: root
   tasks:
     - name: Initialize Docker Swarm on the first manager
-      command: docker swarm init --advertise-addr {{ MANAGER1_IP }}
+      command: docker swarm init --advertise-addr {{ manager1_ip }}
       register: swarm_init_output
       ignore_errors: true
 
@@ -113,7 +107,7 @@
         flat: yes
 
     - name: Join the Swarm as a manager
-      command: docker swarm join --token {{ lookup('file', '/tmp/manager_join_token') }} {{ MANAGER1_IP }}:2377
+      command: docker swarm join --token {{ lookup('file', '/tmp/manager_join_token') }} {{ manager1_ip }}:2377
 
 - name: Join worker nodes to the Swarm
   hosts: workers
@@ -127,4 +121,4 @@
         flat: yes
 
     - name: Join the Swarm as a worker
-      command: docker swarm join --token {{ lookup('file', '/tmp/worker_join_token') }} {{ MANAGER1_IP }}:2377
+      command: docker swarm join --token {{ lookup('file', '/tmp/worker_join_token') }} {{ manager1_ip }}:2377
