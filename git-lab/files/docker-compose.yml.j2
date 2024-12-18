@@ -14,6 +14,7 @@ services:
     volumes:
       - ./gitlab/config:/etc/gitlab
       - ./gitlab/data:/var/opt/gitlab
+    network_mode: 'host'
 
   gitlab-runner:
     image: gitlab/gitlab-runner:alpine
