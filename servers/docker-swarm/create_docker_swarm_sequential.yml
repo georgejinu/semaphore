@@ -2,6 +2,40 @@
   hosts: all
   become: true
   become_user: root
+  # pre_tasks:
+  #   - name: Install Docker dependencies
+  #     apt:
+  #       name:
+  #         - apt-transport-https
+  #         - ca-certificates
+  #         - curl
+  #         - software-properties-common
+  #       state: present
+  #       update_cache: yes
+
+  #   - name: Update package cache
+  #     apt:
+  #       update_cache: yes
+
+  #   - name: Install Docker
+  #     apt:
+  #       name: docker-ce
+  #       state: present
+  #       update_cache: yes
+  #     ignore_errors: true
+
+  #   - name: Fallback to install Docker IO if Docker CE is unavailable
+  #     apt:
+  #       name: docker.io
+  #       state: present
+  #       update_cache: yes
+  #     when: ansible_failed_when_result is defined and ansible_failed_when_result
+
+  #   - name: Start and enable Docker
+  #     systemd:
+  #       name: docker
+  #       state: started
+  #       enabled: true
   tasks:
     - name: Debug Manager and Worker IPs
       debug:
@@ -11,40 +45,6 @@
           - 'worker1_ip: {{ worker1_ip }}'
           - 'worker2_ip: {{ worker2_ip }}'
           - 'worker3_ip: {{ worker3_ip }}'
-  pre_tasks:
-    - name: Install Docker dependencies
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - software-properties-common
-        state: present
-        update_cache: yes
-
-    - name: Update package cache
-      apt:
-        update_cache: yes
-
-    - name: Install Docker
-      apt:
-        name: docker-ce
-        state: present
-        update_cache: yes
-      ignore_errors: true
-
-    - name: Fallback to install Docker IO if Docker CE is unavailable
-      apt:
-        name: docker.io
-        state: present
-        update_cache: yes
-      when: ansible_failed_when_result is defined and ansible_failed_when_result
-
-    - name: Start and enable Docker
-      systemd:
-        name: docker
-        state: started
-        enabled: true
 
 - name: Initialize Docker Swarm Cluster
   hosts: managers[0]
