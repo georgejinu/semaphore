@@ -26,6 +26,14 @@
         name: docker-compose
         state: present
 
+    - name: Create directory for Docker Compose files
+      file:
+        path: /opt/docker-compose
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
     # Step 3: Copy Docker Compose file to the target machine
     - name: Copy Docker Compose file
       copy:
