@@ -1,0 +1,64 @@
+- name: Docker Installation Pre-tasks
+  hosts: all
+  become: true
+  become_user: root
+
+  pre_tasks:
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: 'deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable'
+        state: present
+        update_cache: yes
+
+    - name: Install Docker CE
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+      register: docker_install_result
+      ignore_errors: true
+
+    - name: Fallback to install Docker IO
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+      when: docker_install_result is failed
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Add current user to docker group
+      user:
+        name: '{{ ansible_user }}'
+        groups: docker
+        append: yes
+
+    - name: Reset connection to apply group changes
+      meta: reset_connection
+
+  handlers:
+    - name: Restart Docker
+      systemd:
+        name: docker
+        state: restarted
+        daemon_reload: yes
