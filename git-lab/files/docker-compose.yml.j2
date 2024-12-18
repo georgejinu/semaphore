@@ -7,7 +7,7 @@ services:
       GITLAB_ROOT_EMAIL: "${EMAIL}"
       GITLAB_ROOT_PASSWORD: "${PASSWORD}"
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://"${HOST}":8000'
+        external_url 'http://${HOST}:8000'
         nginx['listen_port'] = 8000
     ports:
       - '8000:8000'
