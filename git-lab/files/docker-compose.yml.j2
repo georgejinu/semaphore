@@ -16,9 +16,9 @@ services:
       - ./gitlab/data:/var/opt/gitlab
     network_mode: 'host'
 
-  gitlab-runner:
-    image: gitlab/gitlab-runner:alpine
-    container_name: gitlab-runner
-    network_mode: 'host'
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+  # gitlab-runner:
+  #   image: gitlab/gitlab-runner:alpine
+  #   container_name: gitlab-runner
+  #   network_mode: 'host'
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
