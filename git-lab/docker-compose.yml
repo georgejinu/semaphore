@@ -48,3 +48,7 @@
         recreate: always
         remove_orphans: true
         pull: true
+      environment:
+        EMAIL: '{{ email }}'
+        PASSWORD: '{{ password }}'
+        HOST: '{{ host }}'
