@@ -11,9 +11,6 @@ services:
         nginx['listen_port'] = 8000
     ports:
       - '8000:8000'
-    volumes:
-      - ./gitlab/config:/etc/gitlab
-      - ./gitlab/data:/var/opt/gitlab
     network_mode: 'host'
 
   # gitlab-runner:

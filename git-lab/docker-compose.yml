@@ -45,3 +45,4 @@
       community.docker.docker_compose:
         project_src: /opt/docker-compose/
         state: present # Options: present, absent, or restarted
+        remove_orphans: true
