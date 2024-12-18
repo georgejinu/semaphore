@@ -1,0 +1,19 @@
+- name: Remove Docker Swarm from all nodes
+  hosts: all
+  become: true
+  tasks:
+    - name: Leave Docker Swarm
+      command: docker swarm leave --force
+      register: leave_output
+      ignore_errors: true
+
+    - name: Print Swarm leave output
+      debug:
+        msg: '{{ leave_output.stdout }}'
+
+- name: Cleanup Swarm Data on Manager Nodes
+  hosts: managers
+  become: true
+  tasks:
+    - name: Remove swarm data directory
+      command: rm -rf /var/lib/docker/swarm
