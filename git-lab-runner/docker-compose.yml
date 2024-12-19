@@ -2,12 +2,10 @@
   hosts: all
   become: true
   become_user: root
-  vars:
-    ansible_python_interpreter: /usr/bin/python3
   pre_tasks:
     - name: Ensure Python Docker SDK is installed
       pip:
-        name: docker
+        name: docker>=5.0.0
         state: present
       become: yes
 
