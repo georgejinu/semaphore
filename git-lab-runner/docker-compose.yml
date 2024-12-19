@@ -1,5 +1,16 @@
-- name: Git Lab Runner Parameters
+- name: Git Lab Runner Pretask and Debug
   hosts: all
+  become: true
+  become_user: root
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  pre_tasks:
+    - name: Ensure Python Docker SDK is installed
+      pip:
+        name: docker
+        state: present
+      become: yes
+
   tasks:
     - name: Debug Git Lab Runner Parameters
       debug:

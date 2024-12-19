@@ -10,13 +10,10 @@ services:
                                       --url 'http://${HOST}:8088' \
                                       --registration-token 'r3g1str4t10n' \
                                       --executor 'docker' \
-                                      --docker-network-mode 'host' \
+                                      --docker-network-mode "swarm"
                                       --docker-image 'alpine:latest' \
                                       --description 'home-office docker runner' \
                                       --tag-list 'home-office,testing,docker' \
                                       --run-untagged 'false' \
                                       --locked 'false'"
             && gitlab-runner run --user=gitlab-runner --working-directory=/etc/gitlab-runner"]
-    depends_on:
-      gitlab-server:
-        condition: service_healthy
