@@ -1,0 +1,25 @@
+- name: Upgrade all apt packages
+  hosts: all
+  become: true
+  become_user: root
+  tasks:
+    - name: Remove apt lock files
+      become: true
+      become_user: root
+      command: rm -f /var/lib/apt/lists/lock /var/cache/apt/archives/lock /var/lib/dpkg/lock-frontend
+
+    - name: Reconfigure dpkg
+      become: true
+      become_user: root
+      command: dpkg --configure -a
+
+    - name: Update and upgrade apt packages
+      become: true
+      become_user: root
+      vars:
+        ansible_remote_tmp: /tmp
+      apt:
+        update_cache: yes
+        upgrade: dist
+        force_apt_get: yes
+        state: present
