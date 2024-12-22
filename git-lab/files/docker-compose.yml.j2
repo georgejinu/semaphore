@@ -7,15 +7,12 @@ services:
       GITLAB_ROOT_EMAIL: "${EMAIL}"
       GITLAB_ROOT_PASSWORD: "${PASSWORD}"
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://${HOST}:8088'
-        nginx['redirect_http_to_https'] = true
-        nginx['ssl_certificate'] = "/etc/gitlab/ssl/${HOST_URL}.crt"
-        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/${HOST_URL}.key"
-        # Disable Let's Encrypt
-        letsencrypt['enable'] = false
+        external_url 'https://${HOST_URL}:8088'
+        nginx['listen_port'] = 8443
         puma['worker_processes'] = 0
         gitlab_rails['registry_enabled'] = true
         registry_external_url 'http://${HOST}:5001'
+        registry_nginx['listen_port'] = 5001
     ports:
       - '443:443'
       - '8088:8088'
