@@ -8,6 +8,7 @@ services:
       GITLAB_ROOT_PASSWORD: "${PASSWORD}"
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://${HOST_URL}'
+        letsencrypt['enable'] = false
         nginx['listen_port'] = 8088
         puma['worker_processes'] = 0
         gitlab_rails['registry_enabled'] = true
