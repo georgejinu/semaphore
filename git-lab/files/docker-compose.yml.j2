@@ -2,7 +2,6 @@ version: '3.8'
 services:
   gitlab-server:
     image: 'gitlab/gitlab-ce:latest'
-    container_name: gitlab-server
     environment:
       GITLAB_ROOT_EMAIL: "${EMAIL}"
       GITLAB_ROOT_PASSWORD: "${PASSWORD}"
