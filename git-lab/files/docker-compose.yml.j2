@@ -2,6 +2,7 @@ version: '3.8'
 services:
   gitlab-server:
     image: 'gitlab/gitlab-ce:latest'
+    container_name: gitlab-server
     environment:
       GITLAB_ROOT_EMAIL: "${EMAIL}"
       GITLAB_ROOT_PASSWORD: "${PASSWORD}"
@@ -25,5 +26,3 @@ services:
       interval: 60s
       timeout: 3s
       retries: 5
-    deploy:
-      replicas: 3
